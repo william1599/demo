@@ -1,0 +1,97 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: ./ima-front
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    depends_on:
+      - rest-admin
+      - rest-collections
+      - rest-arquitectures
+      - rest-train
+      - rest-predictions
+      - ima-core
+
+  rest-admin:
+    build:
+      context: ./rest-admin
+      dockerfile: Dockerfile
+    ports:
+      - 3119:3119
+    depends_on:
+      - database
+
+  rest-collections:
+    build:
+      context: ./rest-collections
+      dockerfile: Dockerfile
+    ports:
+      - 3115:3115
+    volumes:
+      - data-volume:/app/colecciones
+    depends_on:
+      - database
+
+  rest-arquitectures:
+    build:
+      context: ./rest-arquitectures
+      dockerfile: Dockerfile
+    ports:
+      - 3116:3116
+    depends_on:
+      - database
+
+  rest-train:
+    build:
+      context: ./rest-train
+      dockerfile: Dockerfile
+    ports:
+      - 3117:3117
+    volumes:
+      - func-volume:/app/funciones
+    depends_on:
+      - database
+
+  rest-predictions:
+    build:
+      context: ./rest-predictions
+      dockerfile: Dockerfile
+    ports:
+      - 3018:3018
+    depends_on:
+      - database
+
+  ima-core:
+    build:
+      context: ./Core
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - data-volume:/app/colecciones
+      - func-volume:/app/funciones
+      - ./Core:/app
+    depends_on:
+      - rest-admin
+      - rest-collections
+      - rest-arquitectures
+      - rest-train
+      - rest-predictions
+
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - 54320:54320
+    environment:
+      POSTGRES_USER: nnmanager
+      POSTGRES_PASSWORD: rwe56ArZ135651ae
+    volumes:
+      - ./data:/var/lib/postgresql/d
+
+volumes:
+  data-volume:
+  func-volume:
